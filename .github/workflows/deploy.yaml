@@ -42,13 +42,9 @@ jobs:
       - name: Build
         run: hugo --theme=minima
 
-      # Step 5 - Create name file
-      - name: Create cname file
-        run: echo 'niedbalski.dev' > public/CNAME
-
       # Step 6 - Push our generated site to our gh-pages branch
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: .
+          publish_dir: ./public/
