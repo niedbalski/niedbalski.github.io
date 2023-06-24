@@ -1,0 +1,53 @@
+baseURL: http://example.org/
+theme: minima
+languageCode: en-us
+title: 👋 Jorge Niedbalski
+copyright: © 2020-2023
+params:
+  displayDate: true
+  displayDescription: true
+  # selectable specifies if or not your post content can be selected.
+  selectable: true
+  social:
+    - name: "twitter"
+      url: "https://twitter.com/niedbalski"
+    - name: "email"
+      url: "mailto:jnr@metaklass.org"
+    - name: "github"
+      url: "https://github.com/niedbalski"
+    - name: "rss"
+      url: "/index.xml"
+
+# outputs tells Hugo the kind of files to be rendered.
+outputs:
+  home:
+    - HTML
+    - RSS
+    - JSON
+
+# markup.highlight has two keys set to make sure that the syntax highlighting
+# in your posts are rendered correctly, so DO NOT edit them.
+markup:
+  highlight:
+    lineNos: true
+    noClasses: false
+
+# author specifies your name, a slogon and your brief self-introduction.
+author:
+  name: Jorge Niedbalski
+  status: Hi 👋, I'm Jorge Niedbalski.
+  description: |
+    
+    I'm a systems engineer, focused on the development, testing and automation
+    of Linux based infrastructure.
+  
+    Currently, I work as a technical lead for the Backend team at 
+    [Calyptia Inc](https://calyptia.com), building an observability
+    platform on top of [Fluentbit](https://fluentbit.io) using C, Golang
+    and cloud native technologies. 
+
+    Previously, I worked for [Canonical](https://canonical.com) 
+    as a Senior software engineer and previously 
+    for [Linaro](https://linaro.org) driving the cloud on arm64 team. 
+    
+    For more info about my resume, read my [linkedin](https://linkedin.com/jniedbalski)
