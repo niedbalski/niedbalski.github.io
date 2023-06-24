@@ -34,17 +34,3 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_branch: gh-pages
           publish_dir: ./public
-
-      - run: rm -rf public
-
-      # Step 4 - Builds the site using the latest version of Hugo
-      # Also specifies the theme we want to use
-      - name: Build
-        run: hugo --theme=minima
-
-      # Step 6 - Push our generated site to our gh-pages branch
-      - name: Deploy
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./public/
