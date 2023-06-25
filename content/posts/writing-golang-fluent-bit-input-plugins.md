@@ -6,10 +6,6 @@ draft: false
 
 # Writing Golang Fluent Bit Input Plugins
 
-## Introduction
-
-Welcome to this guide on writing Golang input plugins for Fluent Bit! In this document, we will walk you through the process of creating an extensible plugin interface for Fluent Bit input using Golang. This will allow you to easily extend Fluent Bit's capabilities and integrate custom functionality into your data processing pipeline.
-
 ## Context
 
 Fluent Bit is a highly reliable and memory-efficient pipeline data processing engine. It is widely used as a low-forwarder in the Cloud-native landscape and supports metrics and traces as core features. While Fluent Bit itself is written in C, it provides extensible interfaces that allow input, filter, and output plugins to be written in various languages, including Golang.
