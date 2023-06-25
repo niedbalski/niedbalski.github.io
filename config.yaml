@@ -38,16 +38,19 @@ author:
   status: Hi 👋, I'm Jorge Niedbalski.
   description: |
     
-    I'm a systems engineer, focused on the development, testing and automation
-    of Linux based infrastructure.
-  
-    Currently, I work as a technical lead for the Backend team at 
-    [Calyptia Inc](https://calyptia.com), building an observability
-    platform on top of [Fluentbit](https://fluentbit.io) using C, Golang
-    and cloud native technologies. 
-
-    Previously, I worked for [Canonical](https://canonical.com) 
-    as a Senior software engineer and previously 
-    for [Linaro](https://linaro.org) driving the cloud on arm64 team. 
+    I'm a passionate systems engineer with expertise in developing, testing, and automating 
+    Linux-based infrastructure. 
     
-    For more info about my resume, read my [linkedin](https://linkedin.com/jniedbalski)
+    My current role is as a technical lead for the Backend team at [Calyptia Inc](https://calyptia.com), 
+    where we're building an observability platform on top of [Fluentbit](https://fluentbit.io) using C, Golang, 
+    and cloud native technologies.
+  
+    Prior to my current position, I had the opportunity to work as a Senior Software Engineer at [Canonical](https://canonical.com), 
+    where I gained a lot of experience debugging and throubleshooting Linux systems. 
+    
+    Additionally, I was part of the [Linaro](https://linaro.org) team, where I had the 
+    exciting responsibility of driving the cloud on arm64 initiatives.
+    
+    If you're interested in learning more about my professional background, 
+    please feel free to check out my [linkedin](https://linkedin.com/jniedbalski) profile. 
+    I'm always open to connecting with fellow professionals and discussing exciting opportunities.
