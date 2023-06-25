@@ -6,7 +6,7 @@ on:
   pull_request:
 
 jobs:
-  build-deploy:
+  build:
     permissions:
       contents: write
     runs-on: ubuntu-latest
@@ -24,12 +24,31 @@ jobs:
           hugo-version: "latest"
 
       - name: 🧱 Build
-        run: hugo
+        run: hugo --minify
 
+      - name: Upload artifact
+          uses: actions/upload-pages-artifact@v1
+          with:
+            path: ./public
+
+  # Deployment job
+  deploy:
+    # Add a dependency to the build job
+    needs: build
+
+    # Grant GITHUB_TOKEN the permissions required to make a Pages deployment
+    permissions:
+      pages: write      # to deploy to Pages
+      id-token: write   # to verify the deployment originates from an appropriate source
+
+    # Deploy to the github-pages environment
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    # Specify runner + deployment step
+    runs-on: ubuntu-latest
+    steps:
       - name: 🏄‍♂️ Deploy
-        uses: peaceiris/actions-gh-pages@v3
-        if: ${{ github.ref == 'refs/heads/main' }}
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_branch: gh-pages
-          publish_dir: ./public
+        id: deployment
+        uses: actions/deploy-pages@v1
