@@ -3,6 +3,8 @@ theme: minima
 languageCode: en-us
 title: 👋 Jorge Niedbalski
 copyright: © 2023
+googleAnalytics: G-C178BN4JD5
+
 params:
   displayDate: true
   displayDescription: true
