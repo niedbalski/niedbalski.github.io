@@ -2,7 +2,7 @@ baseURL: http://niedbalski.dev/
 theme: minima
 languageCode: en-us
 title: 👋 Jorge Niedbalski
-copyright: © 2020-2023
+copyright: © -2023
 params:
   displayDate: true
   displayDescription: true
