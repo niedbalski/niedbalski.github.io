@@ -3,6 +3,13 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>http://niedbalski.dev/</loc>
+    <lastmod>2023-02-25T14:40:16+02:00</lastmod>
+  </url><url>
+    <loc>http://niedbalski.dev/posts/</loc>
+    <lastmod>2023-02-25T14:40:16+02:00</lastmod>
+  </url><url>
+    <loc>http://niedbalski.dev/posts/writing-golang-fluent-bit-input-plugins/</loc>
+    <lastmod>2023-02-25T14:40:16+02:00</lastmod>
   </url><url>
     <loc>http://niedbalski.dev/categories/</loc>
   </url><url>

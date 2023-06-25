@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <meta property="og:title" content="Writing Golang Fluent Bit Input Plugins" />
+<meta property="og:description" content="Writing Golang Fluent Bit Input Plugins Introduction Welcome to this guide on writing Golang input plugins for Fluent Bit! In this document, we will walk you through the process of creating an extensible plugin interface for Fluent Bit input using Golang. This will allow you to easily extend Fluent Bit&rsquo;s capabilities and integrate custom functionality into your data processing pipeline.
+Context Fluent Bit is a highly reliable and memory-efficient pipeline data processing engine." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="http://niedbalski.dev/posts/writing-golang-fluent-bit-input-plugins/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2023-02-25T14:40:16+02:00" />
+<meta property="article:modified_time" content="2023-02-25T14:40:16+02:00" />
+
+  <meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Writing Golang Fluent Bit Input Plugins"/>
+<meta name="twitter:description" content="Writing Golang Fluent Bit Input Plugins Introduction Welcome to this guide on writing Golang input plugins for Fluent Bit! In this document, we will walk you through the process of creating an extensible plugin interface for Fluent Bit input using Golang. This will allow you to easily extend Fluent Bit&rsquo;s capabilities and integrate custom functionality into your data processing pipeline.
+Context Fluent Bit is a highly reliable and memory-efficient pipeline data processing engine."/>
+
+  
+  
+  <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff">
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#262d33">
+  <title>
+    
+    👋 Jorge Niedbalski - Writing Golang Fluent Bit Input Plugins
+    
+  </title>
+  
+  
+  <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+  
+  
+  
+  <link rel="stylesheet" href="/minima.630c61232d532408e78e986e234575df33158bca0ab02830a01ab1488505b9c7.css" integrity="sha256-YwxhIy1TJAjnjphuI0V13zMVi8oKsCgwoBqxSIUFucc=">
+  
+  
+  
+  <script defer type="text/javascript" src="/minima.4c57970a3012720056a870e8faaef4463359c403f914447117a209fc0231a302.js" integrity="sha256-TFeXCjAScgBWqHDo&#43;q70RjNZxAP5FERxF6IJ/AIxowI="></script>
+  
+  
+  
+</head>
+<script>
+  
+  const default_theme_config = ''
+  const default_light_theme = default_theme_config === 'system' ? 'light' : default_theme_config;
+  let default_theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : default_light_theme;
+
+  try {
+    const saved_theme = localStorage.getItem('theme')
+    if (saved_theme) {
+      default_theme = saved_theme === default_light_theme ? saved_theme : default_light_theme;  
+    }
+    localStorage.setItem('theme', default_theme);
+    window.minima_theme = default_theme;
+    document.querySelector('html').classList.add(default_theme);
+  } catch (e) {
+    console.error(e);
+  }
+</script>
+
+
+
+<body>
+  <header class="mt-3 mb-6">
+  <div class="container mx-auto">
+    <nav class="flex justify-between items-center">
+      <div class="flex items-center">
+        
+        <div id="theme-switch" class="text-3xl cursor-pointer"></div>
+      </div>
+      <ul class="flex items-center text-base font-bold
+        whitespace-nowrap overflow-x-auto overflow-y-hidden">
+        
+      </ul>
+      <ul class="flex item-center text-sm font-bold">
+        
+      </ul>
+    </nav>
+  </div>
+</header>
+
+  
+<div class="container mx-auto">
+  <h1 class="text-4xl font-extrabold mt-6 mb-6">Writing Golang Fluent Bit Input Plugins</h1>
+  <div class="mb-3 text-sm flex justify-between ">
+    <div>
+      
+      Post at &mdash; Feb 25, 2023
+      
+      
+    </div>
+    
+  </div>
+  <main class="mb-8">
+    <p></p>
+    <article class="md">
+      <h1 id="writing-golang-fluent-bit-input-plugins">Writing Golang Fluent Bit Input Plugins</h1>
+<h2 id="introduction">Introduction</h2>
+<p>Welcome to this guide on writing Golang input plugins for Fluent Bit! In this document, we will walk you through the process of creating an extensible plugin interface for Fluent Bit input using Golang. This will allow you to easily extend Fluent Bit&rsquo;s capabilities and integrate custom functionality into your data processing pipeline.</p>
+<h2 id="context">Context</h2>
+<p>Fluent Bit is a highly reliable and memory-efficient pipeline data processing engine. It is widely used as a low-forwarder in the Cloud-native landscape and supports metrics and traces as core features. While Fluent Bit itself is written in C, it provides extensible interfaces that allow input, filter, and output plugins to be written in various languages, including Golang.</p>
+<p>At Calyptia, we have developed a Golang library to support writing input plugins for Fluent Bit. You can find the library at <a href="https://github.com/calyptia/plugin">https://github.com/calyptia/plugin</a>.</p>
+<h2 id="how-to-write-a-golang-input-plugin">How to Write a Golang Input Plugin</h2>
+<p>To demonstrate how easy it is to extend Fluent Bit&rsquo;s input capabilities, let&rsquo;s consider a scenario where we want to monitor the status of GitHub and send an alert to a Slack channel in case of an outage. We will break down the implementation into the following steps:</p>
+<ol>
+<li>Fetch the GitHub status API.</li>
+<li>Filter the response to check if the status is operational. We will implement this using a Fluent Bit Lua filter.</li>
+<li>Dispatch a message to Slack. We will utilize the Fluent Bit Slack output plugin for this part.</li>
+</ol>
+<p>For Step 1, we will implement a custom Fluent Bit input plugin using Golang.</p>
+<h3 id="implementing-the-plugin">Implementing the Plugin</h3>
+<p>Implementing an input plugin in Golang requires implementing a simple interface defined in the <code>github.com/calyptia/plugin</code> package:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kd">type</span> <span class="nx">InputPlugin</span> <span class="kd">interface</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">	<span class="nf">Init</span><span class="p">(</span><span class="nx">ctx</span> <span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span> <span class="nx">fbit</span> <span class="o">*</span><span class="nx">Fluentbit</span><span class="p">)</span> <span class="kt">error</span>
+</span></span><span class="line"><span class="cl">	<span class="nf">Collect</span><span class="p">(</span><span class="nx">ctx</span> <span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span> <span class="nx">ch</span> <span class="kd">chan</span><span class="o">&lt;-</span> <span class="nx">Message</span><span class="p">)</span> <span class="kt">error</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>You can find further information on implementing this interface in the <code>github.com/calyptia/plugin</code> repository.</p>
+<p>Here&rsquo;s an example implementation of a Fluent Bit input plugin for monitoring GitHub status:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span><span class="lnt">57
+</span><span class="lnt">58
+</span><span class="lnt">59
+</span><span class="lnt">60
+</span><span class="lnt">61
+</span><span class="lnt">62
+</span><span class="lnt">63
+</span><span class="lnt">64
+</span><span class="lnt">65
+</span><span class="lnt">66
+</span><span class="lnt">67
+</span><span class="lnt">68
+</span><span class="lnt">69
+</span><span class="lnt">70
+</span><span class="lnt">71
+</span><span class="lnt">72
+</span><span class="lnt">73
+</span><span class="lnt">74
+</span><span class="lnt">75
+</span><span class="lnt">76
+</span><span class="lnt">77
+</span><span class="lnt">78
+</span><span class="lnt">79
+</span><span class="lnt">80
+</span><span class="lnt">81
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kn">package</span> <span class="nx">main</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kn">import</span> <span class="p">(</span>
+</span></span><span class="line"><span class="cl">	<span class="s">&#34;context&#34;</span>
+</span></span><span class="line"><span class="cl">	<span class="s">&#34;encoding/json&#34;</span>
+</span></span><span class="line"><span class="cl">	<span class="s">&#34;errors&#34;</span>
+</span></span><span class="line"><span class="cl">	<span class="s">&#34;io&#34;</span>
+</span></span><span class="line"><span class="cl">	<span class="s">&#34;log&#34;</span>
+</span></span><span class="line"><span class="cl">	<span class="s">&#34;net/http&#34;</span>
+</span></span><span class="line"><span class="cl">	<span class="s">&#34;time&#34;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">	<span class="s">&#34;github.com/calyptia/plugin&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">const</span> <span class="p">(</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">GithubStatusEndpointJSON</span> <span class="p">=</span> <span class="s">&#34;https://www.githubstatus.com/api/v2/status.json&#34;</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">ScrapeInterval</span>           <span class="p">=</span> <span class="nx">time</span><span class="p">.</span><span class="nx">Minute</span> <span class="o">*</span> <span class="mi">5</span>
+</span></span><span class="line"><span class="cl"><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">type</span> <span class="nx">GithubStatusResponse</span> <span class="kd">struct</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">Page</span> <span class="kd">struct</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">		<span class="nx">ID</span>        <span class="kt">string</span>    <span class="s">`json:&#34;id&#34;`</span>
+</span></span><span class="line"><span class="cl">		<span class="nx">Name</span>      <span class="kt">string</span>    <span class="s">`json:&#34;name&#34;`</span>
+</span></span><span class="line"><span class="cl">		<span class="nx">URL</span>       <span class="kt">string</span>    <span class="s">`json:&#34;url&#34;`</span>
+</span></span><span class="line"><span class="cl">		<span class="nx">TimeZone</span>  <span class="kt">string</span>    <span class="s">`json:&#34;time_zone&#34;`</span>
+</span></span><span class="line"><span class="cl">		<span class="nx">UpdatedAt</span> <span class="nx">time</span><span class="p">.</span><span class="nx">Time</span> <span class="s">`json:&#34;updated_at&#34;`</span>
+</span></span><span class="line"><span class="cl">	<span class="p">}</span> <span class="s">`json:&#34;page&#34;`</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">Status</span> <span class="kd">struct</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">		<span class="nx">Indicator</span>   <span class="kt">string</span> <span class="s">`json:&#34;indicator&#34;`</span>
+</span></span><span class="line"><span class="cl">		<span class="nx">Description</span> <span class="kt">string</span> <span class="s">`json:&#34;description&#34;`</span>
+</span></span><span class="line"><span class="cl">	<span class="p">}</span> <span class="s">`json:&#34;status&#34;`</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">func</span> <span class="nf">init</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">plugin</span><span class="p">.</span><span class="nf">RegisterInput</span><span class="p">(</span><span class="s">&#34;go-fluentbit-github-status&#34;</span><span class="p">,</span> <span class="s">&#34;Golang input plugin for checking the status of GitHub&#34;</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">GithubStatusPlugin</span><span class="p">{})</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">type</span> <span class="nx">GithubStatusPlugin</span> <span class="kd">struct</span><span class="p">{}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">func</span> <span class="p">(</span><span class="nx">plug</span> <span class="o">*</span><span class="nx">GithubStatusPlugin</span><span class="p">)</span> <span class="nf">Init</span><span class="p">(</span><span class="nx">ctx</span> <span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span> <span class="nx">fbit</span> <span class="o">*</span><span class="nx">plugin</span><span class="p">.</span><span class="nx">Fluentbit</span><span class="p">)</span> <span class="kt">error</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">	<span class="k">return</span> <span class="kc">nil</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">func</span> <span class="p">(</span><span class="nx">plug</span> <span class="o">*</span><span class="nx">GithubStatusPlugin</span><span class="p">)</span> <span class="nf">Collect</span><span class="p">(</span><span class="nx">ctx</span> <span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span> <span class="nx">ch</span> <span class="kd">chan</span><span class="o">&lt;-</span> <span class="nx">plugin</span><span class="p">.</span><span class="nx">Message</span><span class="p">)</span> <span class="kt">error</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">tick</span> <span class="o">:=</span> <span class="nx">time</span><span class="p">.</span><span class="nf">NewTicker</span><span class="p">(</span><span class="nx">ScrapeInterval</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">	<span class="k">for</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">		<span class="k">select</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">		<span class="k">case</span> <span class="o">&lt;-</span><span class="nx">ctx</span><span class="p">.</span><span class="nf">Done</span><span class="p">():</span>
+</span></span><span class="line"><span class="cl">			<span class="nx">err</span> <span class="o">:=</span> <span class="nx">ctx</span><span class="p">.</span><span class="nf">Err</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">			<span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="o">&amp;&amp;</span> <span class="p">!</span><span class="nx">errors</span><span class="p">.</span><span class="nf">Is</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">context</span><span class="p">.</span><span class="nx">Canceled</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">				<span class="k">return</span> <span class="nx">err</span>
+</span></span><span class="line"><span class="cl">			<span class="p">}</span>
+</span></span><span class="line"><span class="cl">			<span class="k">return</span> <span class="kc">nil</span>
+</span></span><span class="line"><span class="cl">		<span class="k">case</span> <span class="o">&lt;-</span><span class="nx">tick</span><span class="p">.</span><span class="nx">C</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">			<span class="nx">resp</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">http</span><span class="p">.</span><span class="nf">Get</span><span class="p">(</span><span class="nx">GithubStatusEndpointJSON</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">			<span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">				<span class="nx">log</span><span class="p">.</span><span class="nf">Fatal</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">			<span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">			<span class="nx">responseData</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">io</span><span class="p">.</span><span class="nf">ReadAll</span><span class="p">(</span><span class="nx">resp</span><span class="p">.</span><span class="nx">Body</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">			<span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">				<span class="nx">log</span><span class="p">.</span><span class="nf">Fatal</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">			<span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">			<span class="kd">var</span> <span class="nx">githubStatusResponse</span> <span class="nx">GithubStatusResponse</span>
+</span></span><span class="line"><span class="cl">			<span class="nx">err</span> <span class="p">=</span> <span class="nx">json</span><span class="p">.</span><span class="nf">Unmarshal</span><span class="p">(</span><span class="nx">responseData</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">githubStatusResponse</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">			<span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">				<span class="nx">log</span><span class="p">.</span><span class="nf">Fatal</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">			<span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">			<span class="nx">ch</span> <span class="o">&lt;-</span> <span class="nx">plugin</span><span class="p">.</span><span class="nx">Message</span><span class="p">{</span>
+</span></span><span class="line"><span class="cl">				<span class="nx">Time</span><span class="p">:</span> <span class="nx">time</span><span class="p">.</span><span class="nf">Now</span><span class="p">(),</span>
+</span></span><span class="line"><span class="cl">				<span class="nx">Record</span><span class="p">:</span> <span class="kd">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="kd">interface</span><span class="p">{}{</span>
+</span></span><span class="line"><span class="cl">					<span class="s">&#34;data&#34;</span><span class="p">:</span> <span class="nx">githubStatusResponse</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">				<span class="p">},</span>
+</span></span><span class="line"><span class="cl">			<span class="p">}</span>
+</span></span><span class="line"><span class="cl">		<span class="p">}</span>
+</span></span><span class="line"><span class="cl">	<span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">func</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>In this example, we implement the <code>Collect</code> method, which periodically fetches the GitHub status information and sends it as a message. We use the <code>time</code> and <code>net/http</code> packages to make the API request and process the response using JSON encoding.</p>
+<h3 id="building-the-plugin">Building the Plugin</h3>
+<p>To build the plugin, use the following command:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">go build -trimpath -buildmode c-shared -o github_status.so .
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>If you are using an M1-based machine, compile the plugin with the following command:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl"><span class="nv">CGO_ENABLED</span><span class="o">=</span><span class="m">1</span> <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span><span class="nv">GOOS</span><span class="o">=</span>linux <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span><span class="nv">GOARCH</span><span class="o">=</span>amd64 <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span><span class="nv">CC</span><span class="o">=</span><span class="s2">&#34;zig cc -target x86_64-linux-gnu -isystem /usr/include -L/usr/lib/x86_64-linux-gnu&#34;</span> <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span><span class="nv">CXX</span><span class="o">=</span><span class="s2">&#34;zig c++ -target x86_64-linux-gnu -isystem /usr/include -L/usr/lib/x86_64-linux-gnu&#34;</span> <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>go build -trimpath -buildmode c-shared -o github_status.so .
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>The resulting <code>github_status.so</code> file should be placed in the <code>/fluent-bit/etc</code> directory.</p>
+<h3 id="configuration">Configuration</h3>
+<p>To complete Steps 2 and 3, you need a Fluent Bit configuration that includes filtering the input records and sending them to Slack. Here&rsquo;s an example Fluent Bit configuration (<code>fluent-bit.yaml</code>) that uses the Go Fluent Bit GitHub Status plugin:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">service</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">flush</span><span class="p">:</span><span class="w"> </span><span class="m">1</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">log_level</span><span class="p">:</span><span class="w"> </span><span class="l">debug</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">plugins_file</span><span class="p">:</span><span class="w"> </span><span class="l">/fluent-bit/etc/plugins.conf</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">Parsers_file</span><span class="p">:</span><span class="w"> </span><span class="l">/fluent-bit/etc/parsers.conf</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">pipeline</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">inputs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span>- <span class="nt">Name</span><span class="p">:</span><span class="w"> </span><span class="l">go-fluentbit-github-status</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">filters</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span>- <span class="nt">Name</span><span class="p">:</span><span class="w"> </span><span class="l">lua</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">Match</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;*&#39;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">call</span><span class="p">:</span><span class="w"> </span><span class="l">filter</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">code</span><span class="p">:</span><span class="w"> </span><span class="p">|</span><span class="sd">
+</span></span></span><span class="line"><span class="cl"><span class="sd">        function filter(tag, timestamp, record)
+</span></span></span><span class="line"><span class="cl"><span class="sd">          if record.status and record.status.status and record.status.status.description == &#34;All Systems Operational&#34; then
+</span></span></span><span class="line"><span class="cl"><span class="sd">            record = { status = &#34;✅ All GitHub systems are operational&#34; }
+</span></span></span><span class="line"><span class="cl"><span class="sd">          else
+</span></span></span><span class="line"><span class="cl"><span class="sd">            record = { status = &#34;❌ Issues with GitHub (check: https://www.githubstatus.com/)&#34; }
+</span></span></span><span class="line"><span class="cl"><span class="sd">          end
+</span></span></span><span class="line"><span class="cl"><span class="sd">          return 2, timestamp, record
+</span></span></span><span class="line"><span class="cl"><span class="sd">        end</span><span class="w">        
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">outputs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span>- <span class="nt">Name</span><span class="p">:</span><span class="w"> </span><span class="l">slack</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">Match</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;*&#39;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">webhook</span><span class="p">:</span><span class="w"> </span><span class="l">https://hooks.slack.com/xxxx</span><span class="w">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>Replace <code>https://hooks.slack.com/xxxx</code> with the actual webhook URL for your Slack integration.</p>
+<p>Additionally, create a <code>plugins.conf</code> file with the following content:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-ini" data-lang="ini"><span class="line"><span class="cl"><span class="k">[PLUGINS]</span>
+</span></span><span class="line"><span class="cl">    <span class="na">Path /fluent-bit/etc/go-fluentbit-github-status.so</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="running-the-plugin">Running the Plugin</h3>
+<p>Finally, run the latest Fluent Bit release with the plugin loaded and executed using the following command:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">docker run -v <span class="k">$(</span><span class="nb">pwd</span><span class="k">)</span>/github_status.so:/fluent-bit/etc/go-fluentbit-github-status.so -v <span class="k">$(</span><span class="nb">pwd</span><span class="k">)</span>/fluent-bit.yaml:/fluent-bit/etc/fluent-bit.yaml:ro -v <span class="k">$(</span><span class="nb">pwd</span><span class="k">)</span>/plugins.conf:/fluent-bit/etc/plugins.conf:ro fluent/fluent-bit:2.1.2 -c /fluent-bit/etc/fluent-bit.yaml
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Adjust the volume mounts (<code>$(pwd)</code> represents the current directory) and the Fluent Bit image tag according to your environment.</p>
+<p>With this configuration, the Go Fluent Bit GitHub Status plugin will periodically check the GitHub status and rewrite the record&rsquo;s &ldquo;status&rdquo; field to indicate whether all systems are operational or if there are issues. The output can be sent to a Slack channel using the <code>slack</code> output plugin or modified to fit your specific use case.</p>
+<h3 id="conclusion">Conclusion</h3>
+<p>Congratulations! You have successfully written a Golang input plugin for Fluent Bit. This demonstrates how easy it is to extend Fluent Bit&rsquo;s functionality using Golang and integrate custom features into your data processing pipeline. Feel free to explore other possibilities and experiment with different plugins and configurations to suit your specific requirements.
+The plugin works flawless, it runs every 5 minutes and reports back  the status to the slack channel.</p>
+<p><img src="https://raw.githubusercontent.com/niedbalski/go-fluentbit-github-status/043678219646b139e62d3b9be1779b01f5868428/slack-output.png" alt="Slack output"></p>
+<h4 id="links">Links</h4>
+<p>The source code of this experiment can be found here: <a href="https://github.com/niedbalski/go-fluentbit-github-status">https://github.com/niedbalski/go-fluentbit-github-status</a>.</p>
+
+    </article>
+  </main>
+  
+
+
+
+
+</div>
+
+
+  <footer class="mt-8 mb-8">
+  <div class="container mx-auto">
+    <div class="mt-8 flex flex-col-reverse sm:flex-row sm:justify-between items-center">
+      <div class="text-center sm:text-left">
+        <p class="mt-0 text-sm">© 2023</p>
+
+
+
+
+      </div>
+      
+      <p class="flex items-center mt-0">
+        
+          <a class="icon ml-1 mr-1" href="https://twitter.com/niedbalski" title="twitter">
+          
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"/></svg>
+          
+          </a>
+        
+          <a class="icon ml-1 mr-1" href="mailto:jnr@metaklass.org" title="email">
+          
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><path d="M22 6l-10 7L2 6"/></svg>
+          
+          </a>
+        
+          <a class="icon ml-1 mr-1" href="https://github.com/niedbalski" title="github">
+          
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+          
+          </a>
+        
+          <a class="icon ml-1 mr-1" href="/index.xml" title="rss">
+          
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11a9 9 0 0 1 9 9M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="19" r="1"/></svg>
+          
+          </a>
+        
+      </p>
+    </div>
+  </div>
+</footer>
+</body>
+
+</html>

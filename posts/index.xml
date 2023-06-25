@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>👋 Jorge Niedbalski</title>
-    <link>http://niedbalski.dev/</link>
-    <description>Recent content on 👋 Jorge Niedbalski</description>
+    <title>Posts on 👋 Jorge Niedbalski</title>
+    <link>http://niedbalski.dev/posts/</link>
+    <description>Recent content in Posts on 👋 Jorge Niedbalski</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>© 2023</copyright>
-    <lastBuildDate>Sat, 25 Feb 2023 14:40:16 +0200</lastBuildDate><atom:link href="http://niedbalski.dev/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Sat, 25 Feb 2023 14:40:16 +0200</lastBuildDate><atom:link href="http://niedbalski.dev/posts/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Writing Golang Fluent Bit Input Plugins</title>
       <link>http://niedbalski.dev/posts/writing-golang-fluent-bit-input-plugins/</link>
