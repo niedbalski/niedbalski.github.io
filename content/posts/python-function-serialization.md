@@ -1,6 +1,6 @@
 ---
 title: "Python Function Serialization"
-date: 2016-06-26T09:39:30+02:00
+date: 2016-01-10T09:39:30+02:00
 draft: false
 ---
 
