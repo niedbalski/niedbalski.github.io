@@ -1,5 +1,5 @@
 ---
-title: "Python Nose Tests Part Two Custom Plugin"
+title: "Python Nose Tests Writing a Custom Plugin"
 date: 2016-05-27T09:51:03+02:00
 draft: false
 ---
