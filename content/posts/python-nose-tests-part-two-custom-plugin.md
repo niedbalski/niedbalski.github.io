@@ -1,6 +1,6 @@
 ---
 title: "Python Nose Tests Writing a Custom Plugin"
-date: 2016-05-27T09:51:03+02:00
+date: 2013-05-27T09:51:03+02:00
 draft: false
 ---
 # Writing a Basic Nosetests Plugin
