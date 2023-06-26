@@ -93,7 +93,7 @@ $ nosetests --verbosity=3 -x --with-xunit
 
 This command generates a `nosetests.xml` file in the current working directory.
 
-To produce a human-readable report from this XUnit output, I've developed an XSLT template with filters and other useful features, available on [Github Nosetests-XUnit-XSLT](https://github.com/niedbalski/nosetests-xunit-xslt).
+To produce a human-readable report from this XUnit output, I've developed an XSLT template with filters and other useful features, available on [Github Nosetests-XUnit-XSLT](https://github.com/niedbalski/nosetest-xunit-xslt).
 
 To format the report, run the following commands:
 
