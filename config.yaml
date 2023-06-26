@@ -8,7 +8,7 @@ googleAnalytics: G-C178BN4JD5
 params:
   displayDate: true
   displayDescription: true
-  # selectable specifies if or not your post content can be selected.
+  # selectable specifies whether or not your post content can be selected.
   selectable: true
   social:
     - name: "twitter"
@@ -20,7 +20,7 @@ params:
     - name: "rss"
       url: "/index.xml"
 
-# outputs tells Hugo the kind of files to be rendered.
+# Output tells Hugo the kind of files to be rendered.
 outputs:
   home:
     - HTML
@@ -48,10 +48,9 @@ author:
     and cloud native technologies.
   
     Prior to my current position, I had the opportunity to work as a Senior Software Engineer at [Canonical](https://canonical.com), 
-    where I gained a lot of experience debugging and throubleshooting Linux systems. 
-    
-    Additionally, I was part of the [Linaro](https://linaro.org) team, where I had the 
-    exciting responsibility of driving the cloud on arm64 initiatives.
+    where I gained a lot of experience debugging and throubleshooting Linux systems. Before that, 
+    I was part of the [Linaro](https://linaro.org) team, where I had the exciting responsibility of driving the [cloud 
+    on arm64](https://linaro.cloud) initiative.
     
     If you're interested in learning more about my professional background, 
     please feel free to check out my [linkedin](https://linkedin.com/jniedbalski) profile. 
