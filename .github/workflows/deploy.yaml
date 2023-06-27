@@ -49,6 +49,6 @@ jobs:
     # Specify runner + deployment step
     runs-on: ubuntu-latest
     steps:
-      - name: 🏄‍♂️ Deploy
+      - name: 🏄‍ Deploy
         id: deployment
         uses: actions/deploy-pages@v1

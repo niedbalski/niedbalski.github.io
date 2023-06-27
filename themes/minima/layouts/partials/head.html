@@ -8,6 +8,11 @@
   {{ end }}
   <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff">
   <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#262d33">
+
+  <meta
+          name="description"
+          content="{{ if .Params.summary }}{{ .Params.summary }}{{ else if .Site.Params.Description }}{{ .Site.Params.Description }}{{ else }}Systems Engineer passionate about Open Source and Linux. Expert in C, Golang, and cloud-native tech.{{ end }}"
+  />
   <title>
     {{ if .IsHome }}
     {{ .Site.Title }} {{ if .Site.Params.subtitle }} - {{ .Site.Params.subtitle }} {{ end }}
@@ -40,22 +45,3 @@
 	{{ end }}
 {{ end }}
 </head>
-<script>
-  // default to system color scheme.
-  const default_theme_config = '{{ .Site.Params.defaultTheme }}'
-  const default_light_theme = default_theme_config === 'system' ? 'light' : default_theme_config;
-  let default_theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : default_light_theme;
-
-  try {
-    const saved_theme = localStorage.getItem('theme')
-    if (saved_theme) {
-      default_theme = saved_theme === default_light_theme ? saved_theme : default_light_theme;  
-    }
-    localStorage.setItem('theme', default_theme);
-    window.minima_theme = default_theme;
-    document.querySelector('html').classList.add(default_theme);
-  } catch (e) {
-    console.error(e);
-  }
-</script>
-
