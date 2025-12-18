@@ -6,7 +6,7 @@ copyright: © 2023
 googleAnalytics: G-C178BN4JD5
 
 params:
-  Description: "Systems Engineer passionate about Open Source and Linux. Expert in C, Golang, and cloud-native tech."
+  Description: "Systems Engineer passionate about Open Source and Linux. Expert in C, Golang and cloud-native tech."
   displayDate: true
   displayDescription: true
   # selectable specifies whether your post content can be selected.
@@ -40,14 +40,21 @@ author:
   name: Jorge Niedbalski
   status: Hi 👋, I'm Jorge Niedbalski.
   description: |
-    
-    I'm a systems engineer with a passion for all things related to infrastructure, open source and Linux.
-  
-    These days, I work as technical lead for [Calyptia Inc](https://calyptia.com)'s Backend team, mixing C, Golang, 
-    and cloud native tech to build an observability platform on top of [Fluentbit](https://fluentbit.io).
-  
-    Before this, I was a Senior Software Engineer at [Canonical](https://canonical.com), 
-    knee-deep in debugging Linux systems, and even worked with [Linaro](https://linaro.org)'s team, driving their cloud on arm64 initiative.
-    
-    My [Linkedin](https://www.linkedin.com/in/niedbalskir/)'s open! I'm always open to connecting with fellow professionals and discussing exciting opportunities.
+    I’m an engineer with a focus on Open Source and Linux.
 
+    Over the years, I’ve specialised in performance engineering and systems observability, building
+    and using tools that help uncover bottlenecks, performance issues and security problems.
+
+    I am also an active core developer of [Fluent Bit](https://fluentbit.io), where I work on nice features and help clean up the backlog.
+
+    I do consulting and take on hands on roles when an interesting challenge comes up. These days, 
+    I help [Garnet](https://garnet.ai) build a runtime security platform that detects threats efficiently and in a vendor-agnostic way using [eBPF](https://jibril.garnet.ai/).
+
+    Previously, I’ve worked on multiple startups, including Chronosphere (acquired by Palo Alto Networks),
+    Calyptia (acquired by Chronosphere), Nimbic (acquired by Siemens), and Betazeta (acquired by
+    Metro International).
+
+    Earlier in my career, I worked at [Canonical](https://canonical.com), where I spent a lot of time debugging Linux systems
+    and contributing to the Debian/Ubuntu ecosystem. I also led the cloud-on-ARM64 initiative at
+    [Linaro](https://linaro.org), helping make OpenStack and Kubernetes run on the first generation of ARM server
+    architectures.
